@@ -1,58 +1,55 @@
 $Username = $Env:UserName
 
+set-alias gvim vim
+
 # change title
 $Host.UI.RawUI.WindowTitle = $env:USERNAME
 
 # Set up stuff specific to this particular PC or environment
-. c:\local\set-LocalEnvironment.ps1
 
-if (test-path 'C:\Program Files\Vim\vim74\gvim.exe')
-{
-    set-alias gvim 'C:\Program Files\Vim\vim74\gvim.exe'
-}
-else
-{
-    set-alias gvim 'C:\Program Files (x86)\Vim\vim74\gvim.exe'
-}
 
-if (test-path 'd:\hugo')
-{
-    function cdhugo { cd D:\hugo\sites\example.com }
-    function cdodt { cd D:\hugo\sites\example.com\content\on-this-day }
+    function cdhugo { cd /home/matt/salisburyandstonehenge.net }
+    function cdodt { cd /home/matt/salisburyandstonehenge.net/content/on-this-day }
+    function cdoodt { cd /home/matt/sdcard/hugo/sites/example.com/content/on-this-day }
+    function cdpic { cd /home/matt/salisburyandstonehenge.net/static/images }
     set-alias cdotd cdodt
-    $ENV:PAth = $Env:Path + ";D:\hugo\bin"
+    $ENV:PAth = $Env:Path + ";/home/matt/sdcard/hugo/bin"
 
-    # function runhugo {cd D:\hugo\sites\example.com ; d:\hugo\bin\hugo server -w -v --renderToDisk --theme hyde}
-    function runhugo {cd D:\hugo\sites\example.com ; d:\hugo\bin\hugo server -w  --renderToDisk --theme hyde}
-    function rundocs {cd D:\hugo\sites\docs ; d:\hugo\bin\hugo server -w -v --renderToDisk -p 1314}
+    # function runhugo {cd /home/matt/sdcard/hugo/sites/salisburyandstonehenge.net ; d:/hugo/bin/hugo server -w -v --renderToDisk --theme hyde}
+    function runhugo {cd /home/matt/salisburyandstonehenge.net ; d:/hugo/bin/hugo server -w  --renderToDisk --theme hyde}
+    function rundocs {cd /home/matt/sdcard/hugo/sites/docs ; d:/hugo/bin/hugo server -w -v --renderToDisk -p 1314}
     set-alias rundoc rundocs
-}
+    $OLD = "/home/matt/sdcard/hugo/sites/example.com/content/on-this-day"
+    $OTD = "/home/matt/sdcard/hugo/sites/salisburyandstonehenge.net/content/on-this-day"
+    $NEW = "/home/matt/salisburyandstonehenge.net/content/on-this-day"
 
-if (test-path C:\powershell)
+New-PSDrive -Name PoSh -PSProvider FileSystem -root /home/matt/sdcard/powershell 
+if (test-path PoSh:)
 {
-    $PowershellFolder = "C:\powershell"
+    $PowershellFolder = "PoSh:"
 }
 else
 {
-    $PowershellFolder = "C:\Users\$Username\Documents\windowspowershell"
+    $PowershellFolder = "C:/Users/$Username/Documents/windowspowershell"
 }
-cd $PowershellFolder
+# cd $PowershellFolder
 
-$Modules = "$PowershellFolder\Modules" 
-$env:PSModulePath = "$env:PSModulePath;$Modules"
-$Scripts = "$PowershellFolder\Scripts" 
-$Functions = "$PowershellFolder\Functions" 
+$Modules = "$PowershellFolder/modules" 
+$env:PSModulePath = "$env:PSModulePath;$Modules;$PowershellFolder/work_in_progress"
+$Scripts = "$PowershellFolder/Scripts" 
+$Functions = "$PowershellFolder/Functions" 
 set-alias ebook cdbook
 
-function cdmod {cd $PowershellFolder\Modules}
-function cdfun {cd $PowershellFolder\Functions}
-function cdscripts {cd $PowershellFolder\scripts}
-function cdwip {cd $PowershellFolder\work_in_progress}
-function cdbook {cd C:\Users\$Username\Documents\a-unix-persons-guide-to-powershell}
-function oldbook {gvim C:\Users\$Username\Documents\zz_old_a-unix-persons-guide-to-powershell\all_the_details.txt} 
+function cdmod {cd $PowershellFolder/Modules}
+function cdfun {cd $PowershellFolder/Functions}
+function cdscripts {cd $PowershellFolder/scripts}
+function cdwip {cd $PowershellFolder/work_in_progress}
+function cdph {cd $PowershellFolder/work_in_progress/poshhugo}
+function cdbook {cd C:/Users/$Username/Documents/a-unix-persons-guide-to-powershell}
+function oldbook {gvim C:/Users/$Username/Documents/zz_old_a-unix-persons-guide-to-powershell/all_the_details.txt} 
 
 
-$FunctionsFolder = "$PowershellFolder\functions"
+$FunctionsFolder = "$PowershellFolder/functions"
 
 $env:path = $env:path + ";" + $PowershellFolder + ";" + $FunctionsFolder
 
@@ -66,7 +63,7 @@ write-verbose "env:path $env:path"
 
 
 write-verbose "About to load functions"
-foreach ($FUNC in $(select-string Autoload $FunctionsFolder\*.ps1))
+foreach ($FUNC in $(select-string Autoload $FunctionsFolder/*.ps1))
 {
 
   $FunctionToAutoload = $Func.Path
@@ -75,7 +72,7 @@ foreach ($FUNC in $(select-string Autoload $FunctionsFolder\*.ps1))
 }
 
 write-verbose "About to non-githubbed functions functions"
-foreach ($FUNC in $(select-string Autoload $UnGithubbedFunctionsFolder\*.ps1))
+foreach ($FUNC in $(select-string Autoload $UnGithubbedFunctionsFolder/*.ps1))
 {
 
   $FunctionToAutoload = $Func.Path
@@ -91,9 +88,9 @@ Searches for specified text in functions folder
 This function is autoloaded
 #>
  param ($SearchString) 
- select-string $SearchString $FunctionsFolder\*.ps1 | select path, line
- select-string $SearchString $Modules\*.psm1 | select path, line
- select-string $SearchString $UnGithubbedFunctionsFolder\*.ps1 | select path, line
+ select-string $SearchString $FunctionsFolder/*.ps1 | select path, line
+ select-string $SearchString $Modules/*.psm1 | select path, line
+ select-string $SearchString $UnGithubbedFunctionsFolder/*.ps1 | select path, line
 
 }
 
@@ -108,4 +105,31 @@ $VerbosePreference = "SilentlyContinue"
 set-executionpolicy bypass
 
 
+$Images = "/home/matt/salisburyandstonehenge.net/static/images"
+$Sas = "/home/matt/salisburyandstonehenge.net"
 
+$env:USERPROFILE = '/home/matt'                                                                                                 
+$env:PSModulePath = $env:PSModulePath + ":/home/matt/powershell/modules"                                                 
+ipmo z                                                                                                                          
+
+function prompt { [string]$x=$pwd
+	$x = $x -replace '/home/matt',''
+	$x = $x -replace '/sdcard',''
+	$x = $x -replace '/salisburyandstonehenge.net','s.net'
+	$x = $x -replace '/mattypenny.net','s.net'
+        "$x >"   }
+
+
+        $HistoryFile = Join-Path '~' -ChildPath 'powershell' -AdditionalChildPath 'history'
+        $HistoryFile = Join-Path $HistoryFile -ChildPath 'ExportedHistory.xml'
+function export-history {
+    Get-History | Export-Clixml $HistoryFile 
+}        
+
+set-alias ehh export-history
+set-alias eh export-history
+set-alias gh export-history
+
+Add-History -InputObject (Import-Clixml -Path $HistoryFile)
+
+ipmo -force PSReadLine
