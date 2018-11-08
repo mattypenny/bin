@@ -1,65 +1,101 @@
 $Username = $Env:UserName
 
-set-alias gvim vim
 
-# change title
-$Host.UI.RawUI.WindowTitle = $env:USERNAME
-
-# Set up stuff specific to this particular PC or environment
+[string]$LinuxHome = "LinuxHome"
+[string]$WinHome = "WinHome"
+[string]$WinWork = "WinWork"
 
 
-    function cdhugo { cd /home/matt/salisburyandstonehenge.net }
-    function cdodt { cd /home/matt/salisburyandstonehenge.net/content/on-this-day }
-    function cdoodt { cd /home/matt/sdcard/hugo/sites/example.com/content/on-this-day }
-    function cdpic { cd /home/matt/salisburyandstonehenge.net/static/images }
-    set-alias cdotd cdodt
-    $ENV:PAth = $Env:Path + ";/home/matt/sdcard/hugo/bin"
+[string][ValidateSet("LinuxHome", "WinHome", "WinWork")]$WhereAmI = "LinuxHome"
 
-    # function runhugo {cd /home/matt/sdcard/hugo/sites/salisburyandstonehenge.net ; d:/hugo/bin/hugo server -w -v --renderToDisk --theme hyde}
-    function runhugo {cd /home/matt/salisburyandstonehenge.net ; d:/hugo/bin/hugo server -w  --renderToDisk --theme hyde}
-    function rundocs {cd /home/matt/sdcard/hugo/sites/docs ; d:/hugo/bin/hugo server -w -v --renderToDisk -p 1314}
-    set-alias rundoc rundocs
-    $OLD = "/home/matt/sdcard/hugo/sites/example.com/content/on-this-day"
-    $OTD = "/home/matt/sdcard/hugo/sites/salisburyandstonehenge.net/content/on-this-day"
-    $NEW = "/home/matt/salisburyandstonehenge.net/content/on-this-day"
 
-New-PSDrive -Name PoSh -PSProvider FileSystem -root /home/matt/sdcard/powershell 
-if (test-path PoSh:)
+
+if ($IsLinux)
 {
-    $PowershellFolder = "PoSh:"
+    $WhereAmI = $LinuxHome
+}
+else 
+{
+    if ($Env:ComputerName -like "P*")
+    {
+        $WhereAmI = $WinWork
+    }
+    else 
+    {
+        $WhereAmI = $WinHome    
+    }
+}
+# Set up stuff specific to this particular PC or environment
+if (test-path c:\local\set-LocalEnvironment.ps1)
+{
+    . c:\local\set-LocalEnvironment.ps1
+}
+if (test-path 'C:\Program Files\Vim\vim74\gvim.exe')
+{
+    set-alias gvim 'C:\Program Files\Vim\vim74\gvim.exe'
 }
 else
 {
-    $PowershellFolder = "C:/Users/$Username/Documents/windowspowershell"
+    set-alias gvim 'C:\Program Files (x86)\Vim\vim74\gvim.exe'
 }
-# cd $PowershellFolder
 
-$Modules = "$PowershellFolder/modules" 
+if ($WhereAmI -eq $LinuxHome)
+{
+    $HomeMatt = '/home/matt'
+}
+else 
+{
+    $HomeMatt = "c:\"    
+}
+
+
+    function cdhugo { cd $(Join-Path $HomeMatt "salisburyandstonehenge.net") }
+    function cdodt { cd $(Join-Path $HomeMatt "salisburyandstonehenge.net/content/on-this-day") }
+    function cdpic { cd $(Join-Path $HomeMatt "salisburyandstonehenge.net/static/images") }
+    set-alias cdotd cdodt
+   $ENV:PAth = $Env:Path + ";/home/matt/sdcard/hugo/bin"
+    
+
+<#
+    function runhugo {cd /home/matt/salisburyandstonehenge.net ; d:/hugo/bin/hugo server -w  --renderToDisk --theme hyde}
+    function rundocs {cd /home/matt/sdcard/hugo/sites/docs ; d:/hugo/bin/hugo server -w -v --renderToDisk -p 1314}
+    set-alias rundoc rundocs
+#>
+#  $OLD = "/home/matt/sdcard/hugo/sites/example.com/content/on-this-day"
+    $OTD = join-path $HomeMatt "salisburyandstonehenge.net/content/on-this-day"
+
+
+$PowershellFolder = join-path $HomeMatt "powershell"
+
+
+if (!($PowershellFolder))
+{
+    $PowershellFolder = "C:\Users\$Username\Documents\windowspowershell"
+}
+cd $PowershellFolder
+
+$Modules = join-path $PowershellFolder "modules"
 $env:PSModulePath = "$env:PSModulePath;$Modules;$PowershellFolder/work_in_progress"
-$Scripts = "$PowershellFolder/Scripts" 
-$Functions = "$PowershellFolder/Functions" 
+$Scripts = join-path $PowershellFolder "Scripts"
+$Functions = join-path $PowershellFolder "Functions"
 set-alias ebook cdbook
 
-function cdmod {cd $PowershellFolder/Modules}
-function cdfun {cd $PowershellFolder/Functions}
-function cdscripts {cd $PowershellFolder/scripts}
+function cdmod {cd $Modules}
+function cdfun {cd $Functions}
+function cdscripts {cd $scripts}
 function cdwip {cd $PowershellFolder/work_in_progress}
-function cdph {cd $PowershellFolder/work_in_progress/poshhugo}
+function cdph {cd $PowershellFolder/modules/poshhugo}
 function cdbook {cd C:/Users/$Username/Documents/a-unix-persons-guide-to-powershell}
-function oldbook {gvim C:/Users/$Username/Documents/zz_old_a-unix-persons-guide-to-powershell/all_the_details.txt} 
-
 
 $FunctionsFolder = "$PowershellFolder/functions"
 
 $env:path = $env:path + ";" + $PowershellFolder + ";" + $FunctionsFolder
 
- 
 $VerbosePreference = "Continue"
 
 write-verbose "BaseFolder $PowershellFolder"
 write-verbose "FunctionsFolder $FunctionsFolder"
 write-verbose "env:path $env:path"
-
 
 
 write-verbose "About to load functions"
@@ -87,44 +123,53 @@ Searches for specified text in functions folder
 
 This function is autoloaded
 #>
- param ($SearchString) 
+param ($SearchString)
  select-string $SearchString $FunctionsFolder/*.ps1 | select path, line
- select-string $SearchString $Modules/*.psm1 | select path, line
- select-string $SearchString $UnGithubbedFunctionsFolder/*.ps1 | select path, line
+select-string $SearchString $Modules/*.psm1 | select path, line
+select-string $SearchString $UnGithubbedFunctionsFolder/*.ps1 | select path, line
 
 }
 
 set-alias sfs select-StringsFromCode
 set-alias gfs sfs
 
-$DEBUGPREFERENCE = "Continue"
+$DEBUGPREFERENCE = "SilentlyContinue"
 $VerbosePreference = "SilentlyContinue"
 
- 
 
-set-executionpolicy bypass
+if (!($WhereAmI -eq $LinuxHome))
+{
+    set-executionpolicy bypass -Scope Process
+}
+$Images = "$HomeMatt/salisburyandstonehenge.net/static/images"
+$Sas = "$HomeMatt/salisburyandstonehenge.net"
 
-
-$Images = "/home/matt/salisburyandstonehenge.net/static/images"
-$Sas = "/home/matt/salisburyandstonehenge.net"
-
-$env:USERPROFILE = '/home/matt'                                                                                                 
-$env:PSModulePath = $env:PSModulePath + ":/home/matt/powershell/modules"                                                 
-ipmo z                                                                                                                          
+# $env:USERPROFILE = '/home/matt'
+if ($WhereAmI -eq $LinuxHome)
+{
+    $env:PSModulePath = $env:PSModulePath + ":/home/matt/powershell/modules"
+}
+else {
+    import-module WindowsStuff
+    import-module SqlStuff
+        
+}
+Import-Module z
+import-module PersonalStuff
+import-module -force PSReadLine
 
 function prompt { [string]$x=$pwd
-	$x = $x -replace '/home/matt',''
-	$x = $x -replace '/sdcard',''
-	$x = $x -replace '/salisburyandstonehenge.net','s.net'
-	$x = $x -replace '/mattypenny.net','s.net'
+    $x = $x -replace '/home/matt',''
+    $x = $x -replace '/sdcard',''
+    $x = $x -replace '/salisburyandstonehenge.net','s.net'
+    $x = $x -replace '/mattypenny.net','s.net'
         "$x >"   }
-
 
         $HistoryFile = Join-Path '~' -ChildPath 'powershell' -AdditionalChildPath 'history'
         $HistoryFile = Join-Path $HistoryFile -ChildPath 'ExportedHistory.xml'
 function export-history {
-    Get-History | Export-Clixml $HistoryFile 
-}        
+    Get-History | Export-Clixml $HistoryFile
+}
 
 set-alias ehh export-history
 set-alias eh export-history
@@ -132,4 +177,3 @@ set-alias gh export-history
 
 Add-History -InputObject (Import-Clixml -Path $HistoryFile)
 
-ipmo -force PSReadLine
