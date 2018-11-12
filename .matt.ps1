@@ -163,8 +163,7 @@ function prompt { [string]$x=$pwd
     $x = $x -replace '/mattypenny.net','s.net'
         "$x >"   }
 
-        $HistoryFile = Join-Path $PowershellFolder -ChildPath 'powershell' 
-        $HistoryFile = Join-Path $HistoryFile -ChildPath 'history'
+        $HistoryFile = Join-Path $PowershellFolder -ChildPath 'history'
         
         $HistoryFile = Join-Path $HistoryFile -ChildPath 'ExportedHistory.xml'
 function export-history {
