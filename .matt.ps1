@@ -31,7 +31,6 @@ if ($WhereAmI -eq $LinuxHome)
     
     $PowershellFolder = join-path $HomeMatt "powershell"
     $env:PSModulePath = $env:PSModulePath + ":/home/matt/powershell/modules"
-    set-executionpolicy bypass -Scope Process
     $ENV:PAth = $Env:Path + ";/home/matt/sdcard/hugo/bin"
     $Images = "$HomeMatt/salisburyandstonehenge.net/static/images"
     $Sas = "$HomeMatt/salisburyandstonehenge.net"
@@ -39,6 +38,9 @@ if ($WhereAmI -eq $LinuxHome)
 }
 else 
 {
+    set-executionpolicy bypass -Scope Process
+    
+    
     $HomeMatt = "c:\matt"
 
     $PowershellFolder = join-path "c:" "powershell"
